@@ -40,6 +40,10 @@ if !exists("g:syntastic_check_on_open")
     let g:syntastic_check_on_open = 0
 endif
 
+if !exists("g:syntastic_check_on_quit")
+    let g:syntastic_check_on_quit = 1
+endif
+
 if !exists("g:syntastic_loc_list_height")
     let g:syntastic_loc_list_height = 10
 endif
@@ -62,6 +66,10 @@ command! SyntasticToggleMode call s:ToggleMode()
 command! -nargs=? -complete=custom,s:CompleteCheckerName SyntasticCheck call s:UpdateErrors(0, <f-args>) <bar> call s:Redraw()
 command! Errors call s:ShowLocList()
 command! SyntasticInfo call s:registry.echoInfoFor(&ft)
+
+for cmd in ['exi', 'exit', 'wq', 'wqa', 'wqall', 'x', 'xa', 'xall', 'xit', 'ZZ']
+    execute 'cabbrev <expr> ' . cmd . ' SyntasticWQHook("' . cmd . '")'
+endfor
 
 highlight link SyntasticError SpellBad
 highlight link SyntasticWarning SpellCap
@@ -207,7 +215,9 @@ endfunction
 
 " Skip running in special buffers
 function! s:SkipFile()
-    return !empty(&buftype) || !filereadable(expand('%')) || getwinvar(0, '&diff')
+    let force_skip = exists('b:syntastic_skip_checks') ? b:syntastic_skip_checks :
+        \ (exists('g:syntastic_skip_checks') ? g:syntastic_skip_checks : 0)
+    return force_skip || !empty(&buftype) || !filereadable(expand('%')) || getwinvar(0, '&diff')
 endfunction
 
 function! s:uname()
@@ -215,6 +225,11 @@ function! s:uname()
         let s:uname = system('uname')
     endif
     return s:uname
+endfunction
+
+function! SyntasticWQHook(command)
+    let g:syntastic_skip_checks = !g:syntastic_check_on_quit
+    return a:command
 endfunction
 
 "return a string representing the state of buffer according to
