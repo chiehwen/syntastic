@@ -40,8 +40,8 @@ if !exists("g:syntastic_check_on_open")
     let g:syntastic_check_on_open = 0
 endif
 
-if !exists("g:syntastic_check_on_quit")
-    let g:syntastic_check_on_quit = 1
+if !exists("g:syntastic_check_on_wq")
+    let g:syntastic_check_on_wq = 1
 endif
 
 if !exists("g:syntastic_loc_list_height")
@@ -228,7 +228,7 @@ function! s:uname()
 endfunction
 
 function! SyntasticWQHook(command)
-    let g:syntastic_skip_checks = !g:syntastic_check_on_quit
+    let g:syntastic_skip_checks = !g:syntastic_check_on_wq
     return a:command
 endfunction
 
